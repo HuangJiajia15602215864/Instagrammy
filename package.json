@@ -1,0 +1,14 @@
+{
+  "name": "instagrammy",
+  "version": "1.0.0",
+  "description": "基于Express+MongoDB搭建图片分享社区",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "hjj",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
