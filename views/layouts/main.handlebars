@@ -3,26 +3,64 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Instagrammy</title>
-  <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Instagrammy</title>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
 </head>
 
 <body>
-  <div class="page-header">
-    <div class="container">
-      <div class="col-md-6">
-        <h1><a href="/">Instagrammy</a></h1>
-      </div>
+    <div class="page-header">
+        <div class="container">
+            <div class="col-md-6">
+                <h1><a href="/">Instagrammy</a></h1>
+            </div>
+        </div>
     </div>
-  </div>
- 
- {{!-- 每个页面自定义内容 --}}
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-8">{{{body}}}</div>
-    </div>
-  </div>
-</body>
 
+    {{!-- 每个页面自定义内容 --}}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8">{{{body}}}</div>
+            <div class="col-sm-4">
+                {{> stats this}}
+                {{> popular this}}
+                {{> comments this}}
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script>    
+  $('#btn-like').on('click', function (event) {
+    event.preventDefault();
+    var imgId = $(this).data('id');
+    $.post('/images/' + imgId + '/like').done(function (data) {
+      $('.likes-count').text(data.likes);
+    });
+  });
+ 
+  $('#btn-delete').on('click', function (event) {
+    event.preventDefault();
+    var $this = $(this);
+ 
+    var remove = confirm('确定要删除这张图片吗?');
+    if (remove) {
+      var imgId = $(this).data('id');
+      $
+        .ajax({
+          url: '/images/' + imgId,
+          type: 'DELETE'
+        })
+        .done(function (result) {
+          if (result) {
+            $this.removeClass('btn-danger').addClass('btn-success');
+            $this.find('i').removeClass('fa-times').addClass('fa-check');
+            $this.append('<span> 已删除!</span>');
+          }
+        });
+    }
+  });
+</script>
+ 
 </html>

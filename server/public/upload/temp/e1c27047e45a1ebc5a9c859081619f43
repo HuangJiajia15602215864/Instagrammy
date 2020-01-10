@@ -1,0 +1,48 @@
+﻿#  1 传入文件下载的URL，进行预览
+
+### url
+```
+http://{API_ROOT}/MinstoneFileOnlinePreview/onlinePreview
+```
+
+### 输入参数
+
+| 字段        | 类型   | 可空 | 字段说明    | 备注 |
+| ----------- | ------ | ---- | ----------- | ---- |
+| documentType | string | 否   | 文件类型 doc docx jpg 之类 |      |
+| url   | string | 否   | 文件下载的URL   |      |
+
+
+```如：
+var originUrl = 'http://192.168.0.152:8888/ApprWxInterface/test.doc'; //要预览文件的访问地址
+var previewUrl = encodeURIComponent(originUrl);//url进行编码
+var documentType = doc;//documentType 参数 文档类型  doc  ppt
+var url = 'http://127.0.0.1:8012/MinstoneFileOnlinePreview/onlinePreview?documentType=' + documentType + '&url=' + previewUrl;
+window.open(url);
+http://192.168.0.152:8012/MinstoneFileOnlinePreview/onlinePreview?url=http://192.168.0.152:8888/ApprWxInterface/test.doc&documentType=doc
+```
+#  2 传入文件的路径，进行预览
+
+### url
+```
+http://{API_ROOT}/MinstoneFileOnlinePreview/onlinePreviewPath
+```
+
+### 输入参数
+| 字段        | 类型   | 可空 | 字段说明    | 备注 |
+| ----------- | ------ | ---- | ----------- | ---- |
+| path | string | 否   | accessToken |      |
+```如：
+path 路径，要二次编码
+var path = '/mnt/MDFilesPath/2019/10/21/560efbad0e354c81b7d2f1c32981915d.docx';
+var newPath = encodeURIComponent(encodeURIComponent(path));
+var url = 'http://192.168.0.152:8012/MinstoneFileOnlinePreview/onlinePreviewPath?path=' + newPath;
+window.open(url);
+```
+http://192.168.0.152:8012/MinstoneFileOnlinePreview/onlinePreviewPath?path=%252Fmnt%252FMDFilesPath%252F2019%252F10%252F21%252F560efbad0e354c81b7d2f1c32981915d.docx
+
+我的预览路径
+http://192.168.0.152:8012/MinstoneFileOnlinePreview/onlinePreviewPath?path=%252Fmnt%252FMDFilesPath%252Fwrit%252F2019%252F10%252F21%252Ff0af6de8f5e8429c9219989bc25e523f.doc
+
+/mnt/MDFilesPath/writ/2019/10/21/f0af6de8f5e8429c9219989bc25e523f.doc
+

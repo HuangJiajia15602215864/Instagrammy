@@ -1,15 +1,129 @@
+const fs = require('fs');
+const path = require('path');
+const md5 = require('md5');
+const sidebar = require('../helpers/sidebar');
+const ImageModel = require('../models/image');
+const CommentModel = require('../models/comment');
 module.exports = {
+    // 根据图片ID展示图片和评论
     index: function(req, res) {
-      // res.send('The image:index controller ' + req.params.image_id);
-      res.render('image');
+      const viewModel = { image: {}, comments: [] };
+      ImageModel.findOne({ filename: { $regex: req.params.image_id } }, function(
+        err,
+        image,
+      ) {
+        if (err) throw err;
+        if (image) {
+          // 增加该图片的访问量
+          image.views += 1;
+          viewModel.image = image;
+          image.save();
+
+          CommentModel.find(
+            { image_id: image._id },
+            {},
+            { sort: { timestamp: 1 } },
+            function(err, comments) {
+              if (err) throw err;
+              viewModel.comments = comments;
+              sidebar(viewModel, function(viewModel) {
+                res.render('image', viewModel);
+              });
+            },
+          );
+        } else {
+          res.redirect('/');
+        }
+      });
     },
+
+    // 上传照片
     create: function(req, res) {
-      res.send('The image:create POST controller');
+      var tempPath = req.file.path;// 上传到服务器的路径(临时)
+      var imgUrl = req.file.filename;// 服务器存储的文件名
+      var ext = path.extname(req.file.originalname).toLowerCase();//originalname:文件初始名，即保存在客户端的文件名
+      var targetPath = path.resolve('./public/upload/' + imgUrl + ext);
+      if (ext === '.png' || ext === '.jpg' || ext === '.jpeg' || ext === '.gif') {
+        fs.rename(tempPath, targetPath, function(err) {// 从临时目录 tempPath 存放到上传目录 targetPath 
+          if (err) throw err;          
+          // res.redirect('/images/' + imgUrl);// 将页面重定向到刚刚上传的图片的详情页面
+          const newImg = new ImageModel({
+            title: req.body.title,
+            description: req.body.description,
+            filename: imgUrl + ext,
+          });
+          console.log('newImg',newImg)
+          newImg.save(function(err, image) {
+            if (err) throw err;
+            res.redirect('/images/' + image.uniqueId);
+          });
+        });
+      } else {
+        fs.unlink(tempPath, function(err) {
+          if (err) throw err;
+          res.json(500, { error: '只允许上传图片文件.' });
+        });
+      }
     },
+
+    // 点赞图片(查询 -> 修改 -> 保存)
     like: function(req, res) {
-      res.send('The image:like POST controller');
+      ImageModel.findOne({ filename: { $regex: req.params.image_id } }, function(
+        err,
+        image,
+      ) {
+        if (!err && image) {
+          image.likes += 1;
+          image.save(function(err) {
+            if (err) res.json(err);
+            else res.json({ likes: image.likes });
+          });
+        }
+      });
     },
+
+    // 删除(先删除上传图片，再删除了此图片所有的评论模型，最后再删除数据库中的图片模型)
+    remove: function(req, res) {
+      ImageModel.findOne({ filename: { $regex: req.params.image_id } }, function(
+        err,
+        image,
+      ) {
+        if (err) throw err;
+        fs.unlink(path.resolve('./public/upload/' + image.filename), function(
+          err,
+        ) {
+          if (err) throw err;
+          CommentModel.remove({ image_id: image._id }, function(err) {
+            image.remove(function(err) {
+              if (!err) {
+                res.json(true);
+              } else {
+                res.json(false);
+              }
+            });
+          });
+        });
+      });
+    },
+
+    // 发表评论
     comment: function(req, res) {
-      res.send('The image:comment POST controller');
+      ImageModel.findOne({ filename: { $regex: req.params.image_id } }, function(
+        err,
+        image,
+      ) {
+        if (!err && image) {
+          const newComment = new CommentModel(req.body);
+          newComment.gravatar = md5(newComment.email);
+          newComment.image_id = image._id;
+          console.log(newComment)
+          newComment.save(function(err, comment) {
+            if (err) throw err;
+            res.redirect('/images/' + image.uniqueId + '#' + comment._id);
+          });
+        } else {
+          res.redirect('/');
+        }
+      });
     },
   };

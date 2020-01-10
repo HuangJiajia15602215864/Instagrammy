@@ -12,11 +12,25 @@ const morgan = require('morgan');
 const methodOverride = require('method-override');
 // 用于在发生错误时打印调用栈，仅在开发时使用
 const errorHandler = require('errorhandler');
+// 处理时间的库
+const moment = require('moment');
 
 const routes = require('./routes');
 
 module.exports = function(app) {
-  app.engine('handlebars', exphbs());
+  // 定义 moment 全局语言
+  moment.locale('zh-cn');
+  app.engine(
+    'handlebars',
+    exphbs.create({
+      helpers: {
+        // timeago 函数能够在模板中使用，将原始的 UNIX 时间戳转换为易于理解的中文时间戳
+        timeago: function(timestamp) {
+          return moment(timestamp).startOf('minute').fromNow();
+        },
+      },
+    }).engine,
+  );
   app.set('view engine', 'handlebars');
   app.use(morgan('dev'));
   app.use(bodyParser.urlencoded({ extended: true }));
