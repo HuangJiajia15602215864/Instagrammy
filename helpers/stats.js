@@ -10,11 +10,11 @@ module.exports = function(callback) {
     [
       // 统计图片总数
       function(next) {
-        ImageModel.count({}, next);
+        ImageModel.countDocuments({}, next);
       },
        // 统计评论总数
       function(next) {   
-        CommentModel.count({}, next);
+        CommentModel.countDocuments({}, next);
       },
       // 对图片所有访问量求和
       function(next) {   

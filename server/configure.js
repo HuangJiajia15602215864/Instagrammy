@@ -1,5 +1,6 @@
 const path = require('path');
 // 用于渲染用户界面的模板引擎
+const Handlebars = require('handlebars');
 const exphbs = require('express-handlebars');
 const express = require('express');
 // 用于解析客户端请求的中间件，包括 HTML 表单和 JSON 请求
@@ -15,6 +16,7 @@ const errorHandler = require('errorhandler');
 // 处理时间的库
 const moment = require('moment');
 
+const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
 const routes = require('./routes');
 
 module.exports = function(app) {
@@ -23,6 +25,7 @@ module.exports = function(app) {
   app.engine(
     'handlebars',
     exphbs.create({
+      handlebars: allowInsecurePrototypeAccess(Handlebars),
       helpers: {
         // timeago 函数能够在模板中使用，将原始的 UNIX 时间戳转换为易于理解的中文时间戳
         timeago: function(timestamp) {

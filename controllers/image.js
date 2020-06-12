@@ -12,6 +12,7 @@ module.exports = {
         err,
         image,
       ) {
+        console.log(req.params.image_id)
         if (err) throw err;
         if (image) {
           // 增加该图片的访问量
@@ -39,6 +40,7 @@ module.exports = {
 
     // 上传照片
     create: function(req, res) {
+      console.log('上传照片')
       var tempPath = req.file.path;// 上传到服务器的路径(临时)
       var imgUrl = req.file.filename;// 服务器存储的文件名
       var ext = path.extname(req.file.originalname).toLowerCase();//originalname:文件初始名，即保存在客户端的文件名
@@ -46,13 +48,11 @@ module.exports = {
       if (ext === '.png' || ext === '.jpg' || ext === '.jpeg' || ext === '.gif') {
         fs.rename(tempPath, targetPath, function(err) {// 从临时目录 tempPath 存放到上传目录 targetPath 
           if (err) throw err;          
-          // res.redirect('/images/' + imgUrl);// 将页面重定向到刚刚上传的图片的详情页面
           const newImg = new ImageModel({
             title: req.body.title,
             description: req.body.description,
             filename: imgUrl + ext,
           });
-          console.log('newImg',newImg)
           newImg.save(function(err, image) {
             if (err) throw err;
             res.redirect('/images/' + image.uniqueId);
